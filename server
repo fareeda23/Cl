@@ -1,0 +1,39 @@
+package javaapplication26;
+import java.io.*;
+import java.net.*;
+import javax.crypto.SecretKey;
+public class Server {
+    public static void main(String[] args) {
+        try {
+            ServerSocket serversocket = new ServerSocket(8080);
+            System.out.println("Server is running");
+            
+            while (true) {
+                Socket socket = serversocket.accept();
+                System.out.println("Client Connected");
+                
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String encryptedMessage = in.readLine();
+                
+                System.out.println("Received Encrypted message" + encryptedMessage);
+                SecretKey key = AESEncryption.Util.getAesKey();
+                
+                try {
+                    String decryptedMessage = AESEncryption.Util.decrypt(encryptedMessage, key);
+                    System.out.println("Decrypted Message" + decryptedMessage);
+                    
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    out.println("Message received and decrypted successfully");
+                    
+                } catch (Exception e) {
+                    System.out.println("Failed to decrypt the message");
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    out.println("only encrypted message are processed");
+                }
+                socket.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
